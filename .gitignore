@@ -1,0 +1,26 @@
+# Lake dependencies and build products
+/.lake/
+
+# Local Lean storage configuration
+/scripts/lean-env.sh
+.env
+.env.*
+!.env.example
+
+# Standalone Lean build products
+*.olean
+*.ilean
+*.olean.private
+*.olean.server
+*.trace
+
+# Python/editor/OS artifacts
+__pycache__/
+*.py[cod]
+.venv/
+.vscode/
+.idea/
+.DS_Store
+*~
+*.swp
+*.swo

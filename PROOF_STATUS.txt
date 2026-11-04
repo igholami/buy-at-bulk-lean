@@ -1,0 +1,22 @@
+The main approximation contracts are proved in BuyAtBulk/Main.lean:
+  BuyAtBulk.polynomial_graph_approximation
+  BuyAtBulk.integral_graph_approximation
+
+Build: passed (3306 jobs, 528 Lean modules).
+Axiom audit: passed (11505 project theorems, including private helpers).
+Main dependency audit: passed (527/527 library modules).
+Execution regressions: passed (25 guarded checks).
+Only propext, Classical.choice, and Quot.sound are used.
+No unfinished proofs or custom axioms occur in the Lean sources.
+
+Reproduce verification:
+  lake build BuyAtBulk
+  python3 scripts/check_axioms.py
+  python3 scripts/check_dependencies.py
+  python3 scripts/check_statement_snippets.py
+  for test in tests/*.lean; do
+    lake env lean -DautoImplicit=false "$test" || exit 1
+  done
+
+The exact approximation and runtime contracts are documented in statements.md.
+The verification scope and operation model are described in AUDIT.txt.
