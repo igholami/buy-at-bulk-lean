@@ -1,4 +1,4 @@
-Verification record: 2026-11-04
+Verification record: 2026-11-13
 Lean toolchain: 4.34.0
 
 Commands
@@ -8,11 +8,13 @@ Commands
   lake env lean -DautoImplicit=false tests/<test>.lean
 
 Results
-  Build completed successfully (3306 jobs; linter warnings only).
-  Audited 11505 project theorems, including private helpers.
-  All 528 Lean modules are import-reachable from the public entry point.
-  All 527 library modules occur in the elaborated type/value dependency
-  closure of BuyAtBulk.paper_main.
+  Build completed successfully (4114 jobs; linter warnings only).
+  Audited 12383 project theorems, including private helpers.
+  All 753 Lean modules are import-reachable from the public entry point.
+  All 752 library modules occur in the elaborated type/value dependency
+  closure of BuyAtBulk.paper_main, which includes the edge-only LP gap
+  (BuyAtBulk.edge_lower_bound) and its intermediate results
+  (BuyAtBulk.edge_gap_stages).
   All 25 guarded execution checks passed.
   No sorry, admit, sorryAx, custom axiom or unsafe declarations in Lean sources.
 
@@ -20,6 +22,8 @@ Main theorem axiom dependencies
   BuyAtBulk.polynomial_graph_approximation: propext, Classical.choice, Quot.sound
   BuyAtBulk.integral_graph_approximation: propext, Classical.choice, Quot.sound
   BuyAtBulk.paper_main: propext, Classical.choice, Quot.sound
+  BuyAtBulk.edge_lower_bound: propext, Classical.choice, Quot.sound
+  BuyAtBulk.edge_gap_stages: propext, Classical.choice, Quot.sound
 
 All audited theorem dependencies use only these three standard Lean axioms.
 Dependency coverage checks actual constant references, not imports alone.
@@ -32,3 +36,6 @@ Scope
   full input encoding. Native compiler and machine-instruction correctness are
   not claimed. Kernel and dependency checks certify the formal declarations;
   correspondence with paper prose is explained separately in statements.md.
+  The edge-only LP gap (BuyAtBulk/EdgeOnlyGap) formalizes the separate note
+  on edge-only instances, including a proof of the Erdős–Sachs high-girth
+  theorem it relies on; no external result is assumed.

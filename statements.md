@@ -1,8 +1,9 @@
 # Main approximation theorem
 
-This page contains only the paper's main approximation theorem and the Lean
+This page contains the paper's main approximation theorem and the Lean
 contracts needed to state its approximation, LP-gap and polynomial-runtime
-guarantees. Supporting lemmas, algorithms and unrelated results are omitted.
+guarantees, followed by the edge-only LP integrality-gap lower bound of the
+extension note. Supporting lemmas, algorithms and unrelated results are omitted.
 The Lean snippets are verbatim source excerpts in their original module context;
 proof bodies are omitted. Source links provide the surrounding types and imports.
 
@@ -122,6 +123,102 @@ rational/integer word-operation counts and intermediate binary word lengths in
 the full graph-input encoding; it does not assert compiled machine-instruction
 correctness. The formal guarantee is assembled from these declarations rather
 than expressed as a literal single-statement transcription of the paper.
+
+# Edge-only LP integrality gap
+
+Note: *An Ω(log h / log log h) Natural-LP Gap for Edge-Only Nonuniform
+Buy-at-Bulk* (5 November 2026), Theorem 1. The note is distributed as a PDF and
+is not bundled with this repository; its statement, transcribed from the PDF:
+
+> There is an infinite sequence of undirected edge-only instances, with h → ∞
+> unit-demand requests and supply size polynomial in h, such that
+> OPT_integral / LP ≥ c · log h / log log h for an absolute constant c > 0.
+> Every edge can be required to have strictly positive rational buying price
+> and physical length, with O(log h)-bit encodings. The terminal-pair graph can
+> additionally be required to be a matching.
+
+The instances are `BuyAtBulk.GraphData`, so the LP is the same natural affine
+LP as above, with per-commodity opening constraints. `GapFamily` lists the
+properties in order: unbounded request count; edge-only unit-demand instances
+with matching terminals and strictly positive data; polynomially many vertices
+and resources and `O(log h)`-bit coefficients; and the gap against the attained
+real LP optimum, which equals the rational optimum `lp`.
+
+Source: [BuyAtBulk/EdgeOnlyGap/Items/GapFamily.lean](BuyAtBulk/EdgeOnlyGap/Items/GapFamily.lean).
+
+<!-- lean-source: BuyAtBulk/EdgeOnlyGap/Items/GapFamily.lean -->
+```lean
+def GapFamily (F : ℕ → BuyAtBulk.GraphData) : Prop :=
+  (∀ M : ℕ, ∃ N : ℕ, ∀ k, N ≤ k → M ≤ (F k).requestCount) ∧
+  (∀ k, EdgeOnlyInstance (F k) ∧ MatchingTerminals (F k) ∧
+    (∀ a, 0 < (F k).buying a ∧ 0 < (F k).length a)) ∧
+  (∃ C K B : ℕ, 0 < C ∧ ∀ k,
+    Fintype.card (F k).Vertex ≤ C*((F k).requestCount)^K ∧
+    (F k).resourceCount ≤ C*((F k).requestCount)^K ∧ CoefficientsBounded (F k) B) ∧
+  (∃ c : ℝ, 0 < c ∧ ∃ N : ℕ, ∀ k, N ≤ k →
+    ∃ opt lp : ℚ, ExactOptima (F k) opt lp ∧ 0 < lp ∧
+      realLPValue (F k).toInstance = (lp : ℝ) ∧
+      0 < realLPValue (F k).toInstance ∧
+      0 < Real.log (Real.log (F k).requestCount) ∧
+      c * Real.log (F k).requestCount / Real.log (Real.log (F k).requestCount) ≤
+        (opt:ℝ) / realLPValue (F k).toInstance)
+```
+
+`ExactOptima D opt lp` says that `opt` is the attained integral optimum, `lp` the
+attained rational LP optimum, and `lp` is also the attained minimum and infimum
+of the LP over real feasible flows.
+
+Source: [BuyAtBulk/EdgeOnlyGap/Items/Optima.lean](BuyAtBulk/EdgeOnlyGap/Items/Optima.lean).
+
+<!-- lean-source: BuyAtBulk/EdgeOnlyGap/Items/Optima.lean -->
+```lean
+def ExactOptima (D : BuyAtBulk.GraphData) (opt lp : ℚ) : Prop :=
+  RationalExactOptima D opt lp ∧
+  RealLPMinimum D.toInstance (lp : ℝ) ∧ realLPValue D.toInstance = (lp : ℝ)
+```
+
+Source: [BuyAtBulk/EdgeOnlyGap/Items/Theorem1.lean](BuyAtBulk/EdgeOnlyGap/Items/Theorem1.lean).
+
+<!-- lean-source: BuyAtBulk/EdgeOnlyGap/Items/Theorem1.lean -->
+```lean
+theorem theorem1 : ∃ F : ℕ → BuyAtBulk.GraphData, GapFamily F
+```
+
+The result is exported as `EdgeGapTarget` and is one of the conjuncts of
+`BuyAtBulk.paper_main`. A further conjunct, `EdgeGapStagesTarget`
+(`BuyAtBulk.edge_gap_stages`), records the note's intermediate nonnegative-cost
+gap (§5, ratio `g/8`) and zero-price pendant reduction (§6).
+
+Source: [BuyAtBulk/TheoremStatements.lean](BuyAtBulk/TheoremStatements.lean).
+
+<!-- lean-source: BuyAtBulk/TheoremStatements.lean -->
+```lean
+def EdgeGapTarget : Prop :=
+  ∃ F : ℕ → GraphData, EdgeOnlyGap.GapFamily F
+```
+
+Source: [BuyAtBulk/Main.lean](BuyAtBulk/Main.lean).
+
+<!-- lean-source: BuyAtBulk/Main.lean -->
+```lean
+theorem edge_lower_bound : EdgeGapTarget
+```
+
+The note assumes the Erdős–Sachs theorem; it is proved here in the weak form the
+note uses, so `theorem1` depends only on the standard axioms.
+
+Source: [BuyAtBulk/EdgeOnlyGap/Items/ErdosSachs.lean](BuyAtBulk/EdgeOnlyGap/Items/ErdosSachs.lean).
+
+<!-- lean-source: BuyAtBulk/EdgeOnlyGap/Items/ErdosSachs.lean -->
+```lean
+theorem erdosSachs (d g : ℕ) (hd : 4 ≤ d) (hg : 4 ≤ g) :
+    ∃ H : FiniteGraph, RegularBase H d g ∧ H.n ≤ 8 * d^g
+```
+
+The constant proved is `c = c₀/24` for the logarithmic-scale constant `c₀`; the
+note's sharper ratio `g/8` is weakened to `g/24` by the positivity modifications.
+
+# Checking the excerpts
 
 Verify the Lean excerpts against the checked-in sources with:
 

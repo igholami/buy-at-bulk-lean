@@ -1,5 +1,11 @@
 import BuyAtBulk.Model.GraphRealization
 import BuyAtBulk.Statements.MainApproximation
+import BuyAtBulk.EdgeOnlyGap.Items.GapFamily
+import BuyAtBulk.EdgeOnlyGap.Items.SupplyData
+import BuyAtBulk.EdgeOnlyGap.Items.LocallySparse
+import BuyAtBulk.EdgeOnlyGap.Items.Parameters
+import BuyAtBulk.EdgeOnlyGap.Items.PrivateLeaves
+import BuyAtBulk.EdgeOnlyGap.Items.RegularBase
 
 /-! Main mathematical targets, stated before their proofs. These are named
 propositions, not asserted theorems: none is silently admitted. Algorithmic
@@ -33,5 +39,29 @@ def NodeGapTarget : Prop :=
         ∀ routing : I.IntegralRouting,
           (Real.log h / Real.log 2 / 4) * (I.buyingCost f : ℝ) <
             (I.integralBuyingCost routing : ℝ)
+
+/-- Theorem 1 of the edge-only LP-gap note: an infinite family of edge-only instances with
+unit demands, matching terminals, strictly positive rational data of `O(log h)` bits and
+polynomial size, whose integral optimum exceeds the attained natural-LP optimum by a factor
+`Ω(log h / log log h)`. See `EdgeOnlyGap.GapFamily`. -/
+def EdgeGapTarget : Prop :=
+  ∃ F : ℕ → GraphData, EdgeOnlyGap.GapFamily F
+
+/-- The two intermediate results of the edge-only LP-gap note. First (§5): on the
+nonnegative-cost construction over a `g`-regular base of girth `g` with a locally sparse
+lift, `OPT ≥ n·g/4`, `LP ≤ 2n`, and `OPT/LP ≥ g/8`. Second (§6): attaching private
+zero-price pendant terminals makes the terminal pairs a matching without changing either
+optimum. -/
+def EdgeGapStagesTarget : Prop :=
+  (∀ (H : EdgeOnlyGap.FiniteGraph) (q g : ℕ) (π : EdgeOnlyGap.Lift H q) (hg : 4 ≤ g),
+    EdgeOnlyGap.RegularBase H g g → 0 < q →
+    EdgeOnlyGap.LocallySparse H q g (EdgeOnlyGap.threshold H g) π →
+    ∃ opt lp : ℚ, EdgeOnlyGap.ExactOptima (EdgeOnlyGap.supplyData H q g π (by omega)) opt lp ∧
+      0 < lp ∧ (H.n:ℚ)*g/4 ≤ opt ∧ lp ≤ 2*H.n ∧ (g:ℚ)/8 ≤ opt/lp) ∧
+  (∀ D : GraphData, EdgeOnlyGap.EdgeOnlyInstance D →
+    EdgeOnlyGap.MatchingTerminals (EdgeOnlyGap.privateLeaves D 0 (by norm_num)) ∧
+    EdgeOnlyGap.EdgeOnlyInstance (EdgeOnlyGap.privateLeaves D 0 (by norm_num)) ∧
+    (∀ opt lp : ℚ, EdgeOnlyGap.ExactOptima (EdgeOnlyGap.privateLeaves D 0 (by norm_num)) opt lp ↔
+      EdgeOnlyGap.ExactOptima D opt lp))
 
 end BuyAtBulk
