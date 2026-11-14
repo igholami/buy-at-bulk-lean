@@ -29,7 +29,9 @@ dependencies use only `propext`, `Classical.choice`, and `Quot.sound`.
 
 The library also contains separate-budget parameterized rounding, sparse
 supplied-path decomposition, an exact rational LP optimizer, and a logarithmic
-node-cost LP lower bound. `BuyAtBulk.paper_main` combines the public results.
+node-cost LP lower bound, and an Ω(log h / log log h) edge-only LP lower bound
+(`BuyAtBulk.edge_lower_bound`, in `BuyAtBulk/EdgeOnlyGap/`, including a proof of
+the Erdős–Sachs high-girth theorem). `BuyAtBulk.paper_main` combines the public results.
 
 Runtime is formalized in the rational/integer word-operation model defined in
 [Primitive.lean](BuyAtBulk/Computation/Runtime/Primitive.lean), with polynomial

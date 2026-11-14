@@ -2,6 +2,9 @@ import BuyAtBulk.Model.IntegralEmbedding
 import BuyAtBulk.TheoremStatements
 import BuyAtBulk.Statements.ZeroBuying
 import BuyAtBulk.LowerBound.NodeGap
+import BuyAtBulk.EdgeOnlyGap.Items.Theorem1
+import BuyAtBulk.EdgeOnlyGap.Items.FiniteGap
+import BuyAtBulk.EdgeOnlyGap.Items.ZeroLeavesOptima
 import BuyAtBulk.UpperBound.ParameterizedRounding
 import BuyAtBulk.UpperBound.Optimization
 import BuyAtBulk.Statements.UniformApproximation
@@ -50,6 +53,15 @@ theorem zero_buying_approximation (I : Instance) (f : I.FractionalSolution)
 
 /-- Full node-cost integrality gap for every number of requests h ≥ 2. -/
 theorem node_lower_bound : NodeGapTarget := LowerBound.node_gap
+
+/-- Edge-only natural-LP integrality-gap lower bound (separate note, Theorem 1). -/
+theorem edge_lower_bound : EdgeGapTarget := EdgeOnlyGap.theorem1
+
+/-- Intermediate results of the edge-only note: the nonnegative-cost gap (§5) and the
+zero-price pendant reduction (§6). -/
+theorem edge_gap_stages : EdgeGapStagesTarget :=
+  ⟨fun H q g π hg base hq sparse => EdgeOnlyGap.finiteGap H q g π hg base hq sparse,
+    fun D edge => EdgeOnlyGap.zeroLeavesOptima D edge⟩
 
 /-- Uniform mathematical part of the parameterized rounding theorem. -/
 theorem parameterized_rounding (I : Instance) (graph : Nonempty I.GraphRealization)
@@ -201,6 +213,7 @@ theorem supplied_sparse_decomposition :
 The computation model counts rational/integer word operations and bounds
 intermediate words; the public contracts are documented in statements.md. -/
 theorem paper_main : UniformRoundingTarget ∧ UniformApproximationTarget ∧ NodeGapTarget ∧
+    EdgeGapTarget ∧ EdgeGapStagesTarget ∧
     UniformGraphRoundingTarget ∧ ExecutableGraphRoundingTarget ∧ StoredGraphRoundingTarget ∧
     GraphInitializationTarget ∧ PolynomialLP.Polynomial.ExactPolynomialOptimizerTarget ∧
     Computation.Runtime.StoredRounding.ParameterizedPolynomialTarget ∧
@@ -210,7 +223,8 @@ theorem paper_main : UniformRoundingTarget ∧ UniformApproximationTarget ∧ No
     Computation.Rounding.SelectedZeroRoundingTarget ∧
     Computation.Runtime.ComputedNetwork.ComputedNetworkTarget ∧
     Computation.Runtime.SparseSupplied.SuppliedSparsePolynomialTarget :=
-  ⟨optimized_rounding, approximation, node_lower_bound, graph_optimized_rounding,
+  ⟨optimized_rounding, approximation, node_lower_bound, edge_lower_bound, edge_gap_stages,
+    graph_optimized_rounding,
     executable_graph_rounding, stored_graph_rounding, graph_initialization,
     exact_polynomial_lp, parameterized_polynomial, integral_graph_approximation,
     polynomial_graph_approximation, supplied_polynomial_rounding,

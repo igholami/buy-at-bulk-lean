@@ -1,10 +1,13 @@
 The main approximation contracts are proved in BuyAtBulk/Main.lean:
   BuyAtBulk.polynomial_graph_approximation
   BuyAtBulk.integral_graph_approximation
+The edge-only LP integrality-gap lower bound is BuyAtBulk.edge_lower_bound
+(BuyAtBulk/Main.lean, proved in BuyAtBulk/EdgeOnlyGap/) and is part of
+BuyAtBulk.paper_main.
 
-Build: passed (3306 jobs, 528 Lean modules).
-Axiom audit: passed (11505 project theorems, including private helpers).
-Main dependency audit: passed (527/527 library modules).
+Build: passed (4114 jobs, 753 Lean modules).
+Axiom audit: passed (12383 project theorems, including private helpers).
+Main dependency audit: passed (752/752 library modules).
 Execution regressions: passed (25 guarded checks).
 Only propext, Classical.choice, and Quot.sound are used.
 No unfinished proofs or custom axioms occur in the Lean sources.
